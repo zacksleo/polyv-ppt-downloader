@@ -18,7 +18,6 @@ struct Opts {
     json: String,
 }
 
-
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Response {
@@ -44,8 +43,6 @@ async fn download(target: &str) -> Result<()> {
             .and_then(|name| if name.is_empty() { None } else { Some(name) })
             .unwrap_or("tmp.bin");
 
-        println!("file to download: '{}'", fname);
-        println!("will be located under: '{:?}'", fname);
         File::create(fname)?
     };
     let content = response.bytes().await?;
@@ -53,13 +50,18 @@ async fn download(target: &str) -> Result<()> {
     Ok(())
 }
 
+fn read_to_string(path: &str) -> Result<String> {
+    let mut file = File::open(path)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
-    let mut file = File::open(opts.json)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    let response: Response = serde_json::from_str(contents.as_str())?;
+    let contents = read_to_string(&opts.json)?;
+    let response: Response = serde_json::from_str(&contents)?;
     for image in response.convert_file_json.images {
         println!("下载文件：{}", image);
         download(image.as_str()).await?;
