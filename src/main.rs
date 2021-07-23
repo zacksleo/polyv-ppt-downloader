@@ -40,6 +40,7 @@ struct FileJson {
     images: Vec<String>,
 }
 
+// 从 URL 中解析文件名
 fn parse_fname_from_url(url: &str) -> Result<String> {
     let url = Url::parse(&url).unwrap();
     let fname = url
@@ -50,6 +51,7 @@ fn parse_fname_from_url(url: &str) -> Result<String> {
     Ok(fname.to_owned())
 }
 
+// 下载文件
 async fn download(target: &str) -> Result<()> {
     let fname = parse_fname_from_url(target).unwrap();
     println!("fname = {}", fname);
