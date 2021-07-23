@@ -85,15 +85,15 @@ fn get_img_mm_size(img: &str) -> (f64, f64) {
 // 将图片合并成 PDF
 fn merge_to_pdf(title: &str, images: Vec<String>) {
     let (width, height) = get_img_mm_size(&images[0]);
-    let (doc, mut page, mut layer) =
+    let (doc, page, layer) =
         PdfDocument::new("PDF_Document_title", Mm(width), Mm(height), "Layer 1");
 
     for (index, image) in images.iter().enumerate() {
-        if index > 0 {
-            let (page1, layer1) = doc.add_page(Mm(width), Mm(height), "Page 2, Layer 1");
-            page = page1;
-            layer = layer1;
-        }
+        let (page, layer) = if index > 0 {
+            doc.add_page(Mm(width), Mm(height), "Page 2, Layer 1")
+        } else {
+            (page, layer)
+        };
         let mut image_file = File::open(&Path::new(&image)).unwrap();
         let image =
             Image::try_from(image::jpeg::JpegDecoder::new(&mut image_file).unwrap()).unwrap();
